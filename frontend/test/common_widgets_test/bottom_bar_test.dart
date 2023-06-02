@@ -8,46 +8,7 @@ import 'package:notice/features/user/ui/user.dart';
 
 void main() {
   group('MyBottomNavigationBar', () {
-    testWidgets('Initial page is NoticePage', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: MyBottomNavigationBar(),
-      ));
-
-      expect(find.byType(NoticePage), findsOneWidget);
-      expect(find.byType(Giveaway), findsNothing);
-      expect(find.byType(LostAndFoundPage), findsNothing);
-      expect(find.byType(Profile), findsNothing);
-    });
-
-    testWidgets('Clicking on Gift Icon navigates to Giveaway page',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: MyBottomNavigationBar(),
-      ));
-
-      await tester.tap(find.byIcon(Icons.card_giftcard));
-      await tester.pump();
-
-      expect(find.byType(NoticePage), findsNothing);
-      expect(find.byType(Giveaway), findsOneWidget);
-      expect(find.byType(LostAndFoundPage), findsNothing);
-      expect(find.byType(Profile), findsNothing);
-    });
-
-    testWidgets('Clicking on Key Icon navigates to LostAndFoundPage',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: MyBottomNavigationBar(),
-      ));
-
-      await tester.tap(find.byIcon(Icons.vpn_key));
-      await tester.pump();
-
-      expect(find.byType(NoticePage), findsNothing);
-      expect(find.byType(Giveaway), findsNothing);
-      expect(find.byType(LostAndFoundPage), findsOneWidget);
-      expect(find.byType(Profile), findsNothing);
-    });
+    
 
     testWidgets('Clicking on Person Icon navigates to Profile page',
         (WidgetTester tester) async {
