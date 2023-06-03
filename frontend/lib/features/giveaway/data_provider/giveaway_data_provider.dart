@@ -5,19 +5,22 @@ import '../model/giveaway_model.dart';
 class GiveawayDataProvider {
   static const String _baseUrl = "http://192.168.56.1:5000/api/v1/giveaway";
   Future<List<Giveaway>> getGiveaways(page, filter) async {
-
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
     String filterOption = '';
-
-
     if (filter.containsKey("catagory")) {
-      filterOption += '${filterOption == '' ? "?" : ""}catagory=${filter["catagory"]}&';
+      filterOption +=
+          '${filterOption == '' ? "?" : ""}catagory=${filter["catagory"]}&';
     }
 
     filterOption += '${filterOption == '' ? "?" : ""}page=$page';
-   
 
-    final  response = await http.get(Uri.parse("$_baseUrl/$filterOption"));
-    
+    final response = await http.get(
+      Uri.parse("$_baseUrl/$filterOption"),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
       final giveaway = jsonDecode(response.body)["data"] as List;
@@ -28,8 +31,13 @@ class GiveawayDataProvider {
   }
 
   Future<Giveaway> create(Giveaway giveaway) async {
-    final  response = await http.post(Uri.parse(_baseUrl),
-        headers: <String, String>{"Content-Type": "application/json"},
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final response = await http.post(Uri.parse(_baseUrl),
+        headers: <String, String>{
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $token'
+        },
         body: giveaway.toJson());
 
     if (response.statusCode == 201) {
@@ -41,8 +49,13 @@ class GiveawayDataProvider {
   }
 
   Future<Giveaway> update(Giveaway giveaway) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
     final response = await http.put(Uri.parse("$_baseUrl/${giveaway.id}"),
-        headers: <String, String>{"Content-Type": "application/json"},
+        headers: <String, String>{
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $token'
+        },
         body: giveaway.toJson());
 
     if (response.statusCode == 200) {
@@ -53,6 +66,15 @@ class GiveawayDataProvider {
   }
 
   Future<void> delete(Giveaway giveaway) async {
-    await http.delete(Uri.parse("$_baseUrl/${giveaway.id}") as Uri);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    await http.delete(
+      Uri.parse(
+        "$_baseUrl/${giveaway.id}",
+      ),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
   }
 }
