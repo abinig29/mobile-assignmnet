@@ -8,6 +8,8 @@ class LostAndFoundDataProvider {
   static const String _baseUrl1 = "http://192.168.56.1:5000/api/v1/lostItem";
   static const String _baseUrl2 = "http://192.168.56.1:5000/api/v1/foundItem";
   Future<List<LostItem>> getLostItems(page, filter) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
     String filterOption = '';
 
     if (filter.containsKey("catagory")) {
@@ -15,8 +17,12 @@ class LostAndFoundDataProvider {
           '${filterOption == '' ? "?" : ""}catagory=${filter["catagory"]}&';
     }
     filterOption += '${filterOption == '' ? "?" : ""}page=$page';
-    http.Response response =
-        await http.get(Uri.parse("$_baseUrl1/$filterOption"));
+    http.Response response = await http.get(
+      Uri.parse("$_baseUrl1/$filterOption"),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
       final lostItems = jsonDecode(response.body)["data"] as List;
@@ -31,6 +37,8 @@ class LostAndFoundDataProvider {
   }
 
   Future<List<FoundItem>> getFoundItems(page, filter) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
     String filterOption = '';
 
     if (filter.containsKey("catagory")) {
@@ -39,8 +47,12 @@ class LostAndFoundDataProvider {
     }
     filterOption += '${filterOption == '' ? "?" : null}page=$page';
     // print("$_baseUrl2/$filterOption");
-    http.Response response =
-        await http.get(Uri.parse("$_baseUrl2/$filterOption"));
+    http.Response response = await http.get(
+      Uri.parse("$_baseUrl2/$filterOption"),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
       final foundItems = jsonDecode(response.body)["data"] as List;
@@ -52,7 +64,9 @@ class LostAndFoundDataProvider {
   }
 
   Future<LostItem> createLostItems(LostItem giveaway) async {
-   
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
     final http.Response response = await http.post(Uri.parse(_baseUrl1),
         headers: <String, String>{"Content-Type": "application/json"},
         body: giveaway.toJson());
@@ -66,8 +80,13 @@ class LostAndFoundDataProvider {
   }
 
   Future<FoundItem> createFoundItem(FoundItem giveaway) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
     final http.Response response = await http.post(Uri.parse(_baseUrl2),
-        headers: <String, String>{"Content-Type": "application/json"},
+        headers: <String, String>{
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $token'
+        },
         body: giveaway.toJson());
 
     if (response.statusCode == 201) {
@@ -79,11 +98,25 @@ class LostAndFoundDataProvider {
   }
 
   Future<void> deleteFoundItem(FoundItem foundItem) async {
-    await http.delete(Uri.parse("$_baseUrl2/${foundItem.id}"));
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    await http.delete(
+      Uri.parse("$_baseUrl2/${foundItem.id}"),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
   }
 
   Future<void> deleteLostItem(LostItem lostItem) async {
-    await http.delete(Uri.parse("$_baseUrl2/${lostItem.id}"));
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    await http.delete(
+      Uri.parse("$_baseUrl2/${lostItem.id}"),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
   }
 
   // Future<Giveaway> update(Giveaway giveaway) async {

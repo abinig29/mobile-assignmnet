@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import '../model/notice_model.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 class NoticeDataProvider {
   static const String _baseUrl = "http://192.168.56.1:5000/api/v1/notice";
   Future<List<Notice>> getNotices(page, filter) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
     String filterOption = '';
 
     if (filter.containsKey("catagory")) {
@@ -21,7 +23,12 @@ class NoticeDataProvider {
     }
     filterOption += '${filterOption == '' ? "?" : ""}page=$page';
     var url = Uri.parse("$_baseUrl/$filterOption");
-    var response = await get(url);
+    var response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
     if (response.statusCode == 200) {
       final notices = jsonDecode(response.body)["data"] as List;
 
@@ -33,8 +40,13 @@ class NoticeDataProvider {
   }
 
   Future<Notice> create(Notice notice) async {
-    final Response response = await post(Uri.parse(_baseUrl),
-        headers: <String, String>{"Content-Type": "application/json"},
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final http.Response response = await http.post(Uri.parse(_baseUrl),
+        headers: <String, String>{
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $token'
+        },
         body: notice.toJson());
 
     if (response.statusCode == 201) {
@@ -46,8 +58,13 @@ class NoticeDataProvider {
   }
 
   Future<Notice> update(Notice notice) async {
-    final response = await put(Uri.parse("$_baseUrl/${notice.id}"),
-        headers: <String, String>{"Content-Type": "application/json"},
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final response = await http.put(Uri.parse("$_baseUrl/${notice.id}"),
+        headers: <String, String>{
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $token'
+        },
         body: notice.toJson());
 
     if (response.statusCode == 200) {
@@ -58,6 +75,13 @@ class NoticeDataProvider {
   }
 
   Future<void> delete(Notice notice) async {
-    await delete(Uri.parse("$_baseUrl/${notice.id}") as Notice);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    await http.delete(
+      Uri.parse("$_baseUrl/${notice.id}"),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
   }
 }
